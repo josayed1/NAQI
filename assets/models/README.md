@@ -1,25 +1,14 @@
 # NSFW Detection Model
 
-## Required Model File
+This app uses TensorFlow Lite for content detection.
 
-This application requires a TensorFlow Lite model for NSFW content detection.
+For actual deployment, you'll need to:
+1. Train or download a pre-trained NSFW detection model (.tflite format)
+2. Place it in this directory as `nsfw_model.tflite`
+3. Update the labels file `labels.txt`
 
-### Model Download Instructions:
+Recommended models:
+- NSFW MobileNet model from GantMan/nsfw_model
+- Yahoo Open NSFW model converted to TFLite
 
-1. **Recommended Model: NSFW MobileNetV2**
-   - Download from: https://github.com/GantMan/nsfw_model/releases
-   - Model file: `nsfw_mobilenet_v2_224_1.tflite`
-   - Place in: `assets/models/nsfw_model.tflite`
-
-2. **Alternative: Use Teachable Machine**
-   - Create custom model at: https://teachablemachine.withgoogle.com/
-   - Export as TensorFlow Lite
-   - Place in: `assets/models/nsfw_model.tflite`
-
-### Model Specifications:
-- Input: 224x224 RGB image
-- Output: Classification scores for content categories
-- Categories: Safe, NSFW (explicit content)
-
-### Important Note:
-Due to GitHub and ethical guidelines, we cannot include pre-trained NSFW detection models in the repository. Please download and add the model file manually.
+Note: The app includes a fallback detection mechanism that works with image analysis.

@@ -1,55 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'models/app_state.dart';
-import 'l10n/app_localizations.dart';
+import 'services/settings_service.dart';
+import 'services/app_provider.dart';
+import 'services/screen_monitor_service.dart';
 import 'screens/home_screen.dart';
-import 'services/nsfw_detector.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize NSFW Detector
-  await NSFWDetector.initialize();
+  // Set preferred orientations
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   
-  runApp(const MyApp());
+  // Initialize services
+  final settingsService = await SettingsService.getInstance();
+  await ScreenMonitorService.initialize();
+  
+  runApp(MyApp(settingsService: settingsService));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final SettingsService settingsService;
+
+  const MyApp({super.key, required this.settingsService});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => AppState(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Naqi - نقي',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF3CB371),
-            brightness: Brightness.light,
-          ),
-          cardTheme: CardThemeData(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+      create: (_) => AppProvider(settingsService),
+      child: Consumer<AppProvider>(
+        builder: (context, appProvider, child) {
+          return MaterialApp(
+            title: 'نقي - Naqi',
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFF3CB371),
+                primary: const Color(0xFF3CB371),
+                secondary: const Color(0xFF90EE90),
+              ),
+              useMaterial3: true,
+              fontFamily: appProvider.language == 'ar' ? null : 'Roboto',
             ),
-            color: Colors.white,
-          ),
-        ),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale('en', ''),
-          Locale('ar', ''),
-        ],
-        home: const HomeScreen(),
+            home: const HomeScreen(),
+          );
+        },
       ),
     );
   }
