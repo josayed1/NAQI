@@ -1,123 +1,87 @@
+import 'package:flutter/material.dart';
+
 class AppLocalizations {
-  final String languageCode;
+  final Locale locale;
 
-  AppLocalizations(this.languageCode);
+  AppLocalizations(this.locale);
 
-  static final Map<String, Map<String, String>> _localizedValues = {
-    'ar': {
-      'app_name': 'نقي',
-      'app_subtitle': 'حماية ذكية للمحتوى',
-      'filter_status': 'حالة الفلتر',
-      'filter_enabled': 'مفعّل',
-      'filter_disabled': 'معطّل',
-      'enable_filter': 'تفعيل الفلتر',
-      'disable_filter': 'تعطيل الفلتر',
-      'sensitivity': 'حساسية الكشف',
-      'sensitivity_low': 'منخفضة',
-      'sensitivity_medium': 'متوسطة',
-      'sensitivity_high': 'عالية',
-      'filtered_scenes': 'المشاهد المفلترة',
-      'scenes': 'مشهد',
-      'silent_mode': 'الوضع الصامت',
-      'silent_mode_desc': 'إيقاف الإشعارات',
-      'parent_mode': 'وضع الوالدين',
-      'parent_mode_desc': 'حماية الإعدادات برمز PIN',
-      'settings': 'الإعدادات',
-      'language': 'اللغة',
-      'arabic': 'العربية',
-      'english': 'English',
-      'about': 'حول التطبيق',
-      'about_text': 'تطبيق نقي يوفر حماية ذكية للمحتوى باستخدام تقنيات التعلم الآلي للكشف عن المحتوى غير اللائق وتطبيق تعتيم تلقائي.',
-      'version': 'الإصدار',
-      'reset_count': 'إعادة تعيين العداد',
-      'enter_pin': 'أدخل رمز PIN',
-      'set_pin': 'تعيين رمز PIN',
-      'confirm_pin': 'تأكيد رمز PIN',
-      'wrong_pin': 'رمز PIN غير صحيح',
-      'pin_not_match': 'رموز PIN غير متطابقة',
-      'cancel': 'إلغاء',
-      'ok': 'موافق',
-      'save': 'حفظ',
-      'reset': 'إعادة تعيين',
-      'permission_required': 'صلاحية مطلوبة',
-      'permission_screen_capture': 'يحتاج التطبيق إلى صلاحية التقاط الشاشة لمراقبة المحتوى',
-      'grant_permission': 'منح الصلاحية',
-      'service_running': 'الخدمة تعمل',
-      'service_stopped': 'الخدمة متوقفة',
-      'protect_message': 'نقي يحميك الآن 🌿',
-    },
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  static Map<String, Map<String, String>> _localizedValues = {
     'en': {
-      'app_name': 'Naqi',
-      'app_subtitle': 'Smart Content Protection',
+      'app_name': 'Naqi - Pure',
       'filter_status': 'Filter Status',
-      'filter_enabled': 'Enabled',
-      'filter_disabled': 'Disabled',
-      'enable_filter': 'Enable Filter',
-      'disable_filter': 'Disable Filter',
-      'sensitivity': 'Detection Sensitivity',
-      'sensitivity_low': 'Low',
-      'sensitivity_medium': 'Medium',
-      'sensitivity_high': 'High',
-      'filtered_scenes': 'Filtered Scenes',
-      'scenes': 'scenes',
-      'silent_mode': 'Silent Mode',
-      'silent_mode_desc': 'Disable notifications',
-      'parent_mode': 'Parent Mode',
-      'parent_mode_desc': 'Protect settings with PIN',
+      'filter_active': 'Filter Active 🌿',
+      'filter_inactive': 'Filter Inactive',
+      'start_filter': 'Start Filter',
+      'stop_filter': 'Stop Filter',
+      'sensitivity_level': 'Sensitivity Level',
+      'statistics': 'Statistics',
+      'filtered': 'Filtered',
+      'since': 'Since',
+      'today': 'Today',
+      'reset': 'Reset',
+      'quick_settings': 'Quick Settings',
+      'quiet_mode': 'Quiet Mode',
+      'no_notifications': 'No notifications',
+      'parental_control': 'Parental Control',
+      'enabled_with_pin': 'Enabled with PIN',
+      'not_enabled': 'Not enabled',
       'settings': 'Settings',
       'language': 'Language',
-      'arabic': 'العربية',
-      'english': 'English',
       'about': 'About',
-      'about_text': 'Naqi provides smart content protection using machine learning to detect inappropriate content and apply automatic blurring.',
+      'privacy_policy': 'Privacy Policy',
       'version': 'Version',
-      'reset_count': 'Reset Counter',
-      'enter_pin': 'Enter PIN',
-      'set_pin': 'Set PIN',
-      'confirm_pin': 'Confirm PIN',
-      'wrong_pin': 'Wrong PIN',
-      'pin_not_match': 'PINs do not match',
-      'cancel': 'Cancel',
-      'ok': 'OK',
-      'save': 'Save',
-      'reset': 'Reset',
-      'permission_required': 'Permission Required',
-      'permission_screen_capture': 'App needs screen capture permission to monitor content',
-      'grant_permission': 'Grant Permission',
-      'service_running': 'Service Running',
-      'service_stopped': 'Service Stopped',
-      'protect_message': 'Naqi is protecting you now 🌿',
+    },
+    'ar': {
+      'app_name': 'نقي',
+      'filter_status': 'حالة الفلتر',
+      'filter_active': 'الفلتر نشط 🌿',
+      'filter_inactive': 'الفلتر متوقف',
+      'start_filter': 'تشغيل الفلتر',
+      'stop_filter': 'إيقاف الفلتر',
+      'sensitivity_level': 'مستوى الحساسية',
+      'statistics': 'الإحصائيات',
+      'filtered': 'تم التنظيف',
+      'since': 'منذ',
+      'today': 'اليوم',
+      'reset': 'إعادة تعيين',
+      'quick_settings': 'إعدادات سريعة',
+      'quiet_mode': 'وضع الهدوء',
+      'no_notifications': 'بدون إشعارات',
+      'parental_control': 'وضع الوالدين',
+      'enabled_with_pin': 'مفعّل برمز PIN',
+      'not_enabled': 'غير مفعّل',
+      'settings': 'الإعدادات',
+      'language': 'اللغة',
+      'about': 'حول التطبيق',
+      'privacy_policy': 'سياسة الخصوصية',
+      'version': 'الإصدار',
     },
   };
 
   String translate(String key) {
-    return _localizedValues[languageCode]?[key] ?? key;
+    return _localizedValues[locale.languageCode]?[key] ?? key;
+  }
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => ['en', 'ar'].contains(locale.languageCode);
+
+  @override
+  Future<AppLocalizations> load(Locale locale) async {
+    return AppLocalizations(locale);
   }
 
-  String get appName => translate('app_name');
-  String get appSubtitle => translate('app_subtitle');
-  String get filterStatus => translate('filter_status');
-  String get filterEnabled => translate('filter_enabled');
-  String get filterDisabled => translate('filter_disabled');
-  String get enableFilter => translate('enable_filter');
-  String get disableFilter => translate('disable_filter');
-  String get sensitivity => translate('sensitivity');
-  String get sensitivityLow => translate('sensitivity_low');
-  String get sensitivityMedium => translate('sensitivity_medium');
-  String get sensitivityHigh => translate('sensitivity_high');
-  String get filteredScenes => translate('filtered_scenes');
-  String get scenes => translate('scenes');
-  String get silentMode => translate('silent_mode');
-  String get silentModeDesc => translate('silent_mode_desc');
-  String get parentMode => translate('parent_mode');
-  String get parentModeDesc => translate('parent_mode_desc');
-  String get settings => translate('settings');
-  String get language => translate('language');
-  String get arabic => translate('arabic');
-  String get english => translate('english');
-  String get about => translate('about');
-  String get aboutText => translate('about_text');
-  String get version => translate('version');
-  String get resetCount => translate('reset_count');
-  String get protectMessage => translate('protect_message');
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
 }

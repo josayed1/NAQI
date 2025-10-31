@@ -1,299 +1,468 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/app_provider.dart';
-import '../utils/app_localizations.dart';
-import '../widgets/filter_toggle_card.dart';
-import '../widgets/sensitivity_slider.dart';
-import '../widgets/statistics_card.dart';
-import '../widgets/settings_list.dart';
+import '../providers/app_state_provider.dart';
+import '../services/filter_service.dart';
+import 'settings_screen.dart';
+import 'parental_control_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<AppProvider>(
-      builder: (context, appProvider, child) {
-        final locale = AppLocalizations(appProvider.language);
-        final isRTL = appProvider.language == 'ar';
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
-        return Directionality(
-          textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
-          child: Scaffold(
-            backgroundColor: Colors.grey[50],
-            appBar: AppBar(
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    locale.appName,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final appState = Provider.of<AppStateProvider>(context);
+    final filterService = Provider.of<FilterService>(context, listen: false);
+    final isRTL = appState.locale.languageCode == 'ar';
+
+    return Directionality(
+      textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            isRTL ? 'نقي - Naqi' : 'Naqi - Pure',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsScreen(),
                   ),
-                  Text(
-                    locale.appSubtitle,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.white70,
-                    ),
-                  ),
-                ],
+                );
+              },
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // App Logo
+                _buildLogo(),
+                const SizedBox(height: 24),
+                
+                // Main Filter Toggle Card
+                _buildMainToggleCard(context, appState, filterService, isRTL),
+                const SizedBox(height: 16),
+                
+                // Sensitivity Control Card
+                _buildSensitivityCard(context, appState, isRTL),
+                const SizedBox(height: 16),
+                
+                // Statistics Card
+                _buildStatisticsCard(context, appState, isRTL),
+                const SizedBox(height: 16),
+                
+                // Quick Settings
+                _buildQuickSettings(context, appState, isRTL),
+                const SizedBox(height: 16),
+                
+                // Parental Control
+                _buildParentalControlButton(context, appState, isRTL),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildLogo() {
+    return Center(
+      child: Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          color: const Color(0xFF90EE90).withOpacity(0.2),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.water_drop,
+          size: 60,
+          color: Color(0xFF3CB371),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildMainToggleCard(
+    BuildContext context,
+    AppStateProvider appState,
+    FilterService filterService,
+    bool isRTL,
+  ) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Text(
+              isRTL ? 'حالة الفلتر' : 'Filter Status',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
-              backgroundColor: const Color(0xFF3CB371),
-              elevation: 0,
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.info_outline),
-                  onPressed: () => _showAboutDialog(context, locale),
+            ),
+            const SizedBox(height: 16),
+            
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: appState.isFilterActive
+                    ? const Color(0xFF3CB371).withOpacity(0.2)
+                    : Colors.grey.withOpacity(0.2),
+              ),
+              child: Center(
+                child: Icon(
+                  appState.isFilterActive ? Icons.shield : Icons.shield_outlined,
+                  size: 60,
+                  color: appState.isFilterActive
+                      ? const Color(0xFF3CB371)
+                      : Colors.grey,
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+            
+            Text(
+              appState.isFilterActive
+                  ? (isRTL ? 'الفلتر نشط 🌿' : 'Filter Active 🌿')
+                  : (isRTL ? 'الفلتر متوقف' : 'Filter Inactive'),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: appState.isFilterActive
+                    ? const Color(0xFF3CB371)
+                    : Colors.grey,
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            ElevatedButton(
+              onPressed: () async {
+                if (!appState.isFilterActive) {
+                  // Start monitoring
+                  final success = await filterService.startMonitoring();
+                  if (success) {
+                    appState.toggleFilter();
+                    if (!appState.isQuietMode && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(isRTL
+                              ? '✅ تم تفعيل الفلتر'
+                              : '✅ Filter activated'),
+                          backgroundColor: const Color(0xFF3CB371),
+                        ),
+                      );
+                    }
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(isRTL
+                              ? '❌ فشل في تفعيل الفلتر'
+                              : '❌ Failed to activate filter'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                } else {
+                  // Stop monitoring
+                  await filterService.stopMonitoring();
+                  appState.toggleFilter();
+                  if (!appState.isQuietMode && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(isRTL
+                            ? '⏸️ تم إيقاف الفلتر'
+                            : '⏸️ Filter deactivated'),
+                      ),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: appState.isFilterActive
+                    ? Colors.grey
+                    : const Color(0xFF3CB371),
+                foregroundColor: Colors.white,
+              ),
+              child: Text(
+                appState.isFilterActive
+                    ? (isRTL ? 'إيقاف الفلتر' : 'Stop Filter')
+                    : (isRTL ? 'تشغيل الفلتر' : 'Start Filter'),
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildSensitivityCard(
+    BuildContext context,
+    AppStateProvider appState,
+    bool isRTL,
+  ) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              isRTL ? 'مستوى الحساسية' : 'Sensitivity Level',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isRTL
+                  ? 'مستوى عالي = فلترة أكثر صرامة'
+                  : 'Higher = More strict filtering',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            Row(
+              children: [
+                const Icon(Icons.tune, color: Color(0xFF3CB371)),
+                Expanded(
+                  child: Slider(
+                    value: appState.sensitivity,
+                    min: 0.0,
+                    max: 1.0,
+                    divisions: 10,
+                    label: '${(appState.sensitivity * 100).toInt()}%',
+                    activeColor: const Color(0xFF3CB371),
+                    onChanged: (value) {
+                      appState.updateSensitivity(value);
+                    },
+                  ),
+                ),
+                Text(
+                  '${(appState.sensitivity * 100).toInt()}%',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF3CB371),
+                  ),
                 ),
               ],
             ),
-            body: SafeArea(
-              child: appProvider.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Filter Toggle Card
-                          FilterToggleCard(
-                            isEnabled: appProvider.isFilterEnabled,
-                            onToggle: () => appProvider.toggleFilter(),
-                            locale: locale,
-                          ),
-                          
-                          const SizedBox(height: 16),
-                          
-                          // Sensitivity Slider
-                          if (appProvider.isFilterEnabled)
-                            SensitivitySlider(
-                              sensitivity: appProvider.sensitivity,
-                              onChanged: (value) => appProvider.setSensitivity(value),
-                              locale: locale,
-                            ),
-                          
-                          if (appProvider.isFilterEnabled)
-                            const SizedBox(height: 16),
-                          
-                          // Statistics Card
-                          StatisticsCard(
-                            filteredCount: appProvider.filteredCount,
-                            onReset: () => _showResetDialog(context, appProvider, locale),
-                            locale: locale,
-                          ),
-                          
-                          const SizedBox(height: 16),
-                          
-                          // Settings List
-                          SettingsList(
-                            silentMode: appProvider.silentMode,
-                            parentMode: appProvider.parentMode,
-                            language: appProvider.language,
-                            onSilentModeToggle: () => appProvider.toggleSilentMode(),
-                            onParentModeToggle: () => _handleParentMode(context, appProvider, locale),
-                            onLanguageChange: (lang) => appProvider.setLanguage(lang),
-                            locale: locale,
-                          ),
-                        ],
-                      ),
-                    ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showAboutDialog(BuildContext context, AppLocalizations locale) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF90EE90).withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.water_drop,
-                color: Color(0xFF3CB371),
-                size: 32,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(locale.about),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+      ),
+    );
+  }
+  
+  Widget _buildStatisticsCard(
+    BuildContext context,
+    AppStateProvider appState,
+    bool isRTL,
+  ) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Text(
+              isRTL ? 'الإحصائيات' : 'Statistics',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildStatItem(
+                  icon: Icons.filter_alt,
+                  label: isRTL ? 'تم التنظيف' : 'Filtered',
+                  value: appState.filteredCount.toString(),
+                ),
+                _buildStatItem(
+                  icon: Icons.schedule,
+                  label: isRTL ? 'منذ' : 'Since',
+                  value: isRTL ? 'اليوم' : 'Today',
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            TextButton.icon(
+              onPressed: () {
+                appState.resetFilteredCount();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(isRTL
+                        ? '✅ تم إعادة تعيين العداد'
+                        : '✅ Counter reset'),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.refresh),
+              label: Text(isRTL ? 'إعادة تعيين' : 'Reset'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildStatItem({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, size: 32, color: const Color(0xFF3CB371)),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF3CB371),
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildQuickSettings(
+    BuildContext context,
+    AppStateProvider appState,
+    bool isRTL,
+  ) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(locale.aboutText),
-            const SizedBox(height: 16),
             Text(
-              '${locale.version}: 1.0.0',
+              isRTL ? 'إعدادات سريعة' : 'Quick Settings',
               style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
+            ),
+            const SizedBox(height: 12),
+            
+            SwitchListTile(
+              title: Text(isRTL ? 'وضع الهدوء' : 'Quiet Mode'),
+              subtitle: Text(
+                isRTL
+                    ? 'بدون إشعارات'
+                    : 'No notifications',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              value: appState.isQuietMode,
+              activeColor: const Color(0xFF3CB371),
+              onChanged: (value) {
+                appState.toggleQuietMode();
+              },
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(locale.translate('ok')),
-          ),
-        ],
       ),
     );
   }
-
-  void _showResetDialog(BuildContext context, AppProvider appProvider, AppLocalizations locale) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(locale.resetCount),
-        content: const Text('هل أنت متأكد من إعادة تعيين العداد؟'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(locale.translate('cancel')),
-          ),
-          TextButton(
-            onPressed: () {
-              appProvider.resetFilteredCount();
-              Navigator.pop(context);
-            },
-            child: Text(locale.translate('reset')),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _handleParentMode(BuildContext context, AppProvider appProvider, AppLocalizations locale) {
-    if (appProvider.parentMode) {
-      // Disable parent mode - verify PIN
-      _showPinDialog(
-        context,
-        locale.translate('enter_pin'),
-        (pin) {
-          if (appProvider.verifyParentPin(pin)) {
-            appProvider.setParentMode(false, null);
-            Navigator.pop(context);
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(locale.translate('wrong_pin'))),
-            );
-          }
-        },
-        locale,
-      );
-    } else {
-      // Enable parent mode - set PIN
-      _showSetPinDialog(context, appProvider, locale);
-    }
-  }
-
-  void _showPinDialog(
+  
+  Widget _buildParentalControlButton(
     BuildContext context,
-    String title,
-    Function(String) onSubmit,
-    AppLocalizations locale,
+    AppStateProvider appState,
+    bool isRTL,
   ) {
-    final pinController = TextEditingController();
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: TextField(
-          controller: pinController,
-          keyboardType: TextInputType.number,
-          obscureText: true,
-          maxLength: 4,
-          decoration: const InputDecoration(
-            hintText: '****',
-            border: OutlineInputBorder(),
+    return Card(
+      color: appState.isParentalControlEnabled
+          ? const Color(0xFF3CB371).withOpacity(0.1)
+          : null,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ParentalControlScreen(),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              Icon(
+                appState.isParentalControlEnabled
+                    ? Icons.lock
+                    : Icons.lock_open,
+                size: 32,
+                color: const Color(0xFF3CB371),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isRTL ? 'وضع الوالدين' : 'Parental Control',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      appState.isParentalControlEnabled
+                          ? (isRTL ? 'مفعّل برمز PIN' : 'Enabled with PIN')
+                          : (isRTL ? 'غير مفعّل' : 'Not enabled'),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios, size: 16),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(locale.translate('cancel')),
-          ),
-          TextButton(
-            onPressed: () => onSubmit(pinController.text),
-            child: Text(locale.translate('ok')),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSetPinDialog(BuildContext context, AppProvider appProvider, AppLocalizations locale) {
-    final pinController = TextEditingController();
-    final confirmController = TextEditingController();
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(locale.translate('set_pin')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: pinController,
-              keyboardType: TextInputType.number,
-              obscureText: true,
-              maxLength: 4,
-              decoration: InputDecoration(
-                labelText: locale.translate('set_pin'),
-                hintText: '****',
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: confirmController,
-              keyboardType: TextInputType.number,
-              obscureText: true,
-              maxLength: 4,
-              decoration: InputDecoration(
-                labelText: locale.translate('confirm_pin'),
-                hintText: '****',
-                border: const OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(locale.translate('cancel')),
-          ),
-          TextButton(
-            onPressed: () {
-              if (pinController.text == confirmController.text &&
-                  pinController.text.length == 4) {
-                appProvider.setParentMode(true, pinController.text);
-                Navigator.pop(context);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(locale.translate('pin_not_match'))),
-                );
-              }
-            },
-            child: Text(locale.translate('save')),
-          ),
-        ],
       ),
     );
   }
