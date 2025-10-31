@@ -43,8 +43,8 @@ dependencies:
   hive_flutter: 1.1.0
   path_provider: 2.1.5
   
-  # TensorFlow Lite for ML
-  tflite_flutter: ^0.10.4
+  # TensorFlow Lite for ML (commented out - add when model is available)
+  # tflite_flutter: ^0.10.4
   
   # Image Processing
   image: ^4.3.0
