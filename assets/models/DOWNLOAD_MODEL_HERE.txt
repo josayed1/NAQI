@@ -1,0 +1,22 @@
+IMPORTANT: TensorFlow Lite Model Required
+==========================================
+
+This application requires a TensorFlow Lite model for NSFW content detection.
+
+To make the app fully functional:
+
+1. Download an NSFW detection model:
+   - Recommended: https://github.com/GantMan/nsfw_model/releases
+   - Look for: nsfw_mobilenet_v2_224_1.tflite
+
+2. Rename the model file to: nsfw_model.tflite
+
+3. Place it in this directory: assets/models/nsfw_model.tflite
+
+4. Rebuild the app: flutter build apk --release
+
+Note: Due to ethical considerations, we cannot include a pre-trained
+NSFW detection model in the repository. You must obtain and add your own model.
+
+The app will work without the model, but the NSFW detection feature will not
+function until a valid TensorFlow Lite model is added.
