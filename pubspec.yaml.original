@@ -1,5 +1,5 @@
 name: naqi
-description: Naqi - Smart Content Filter App
+description: Naqi - Smart content filtering app for privacy protection
 version: 1.0.0+1
 
 environment:
@@ -10,30 +10,32 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   
-  # TensorFlow Lite for NSFW detection
-  tflite_flutter: ^0.10.4
-  
-  # Image processing
-  image: ^4.0.17
-  
-  # State management
+  # State Management
   provider: 6.1.5+1
   
-  # Local storage for settings and statistics
+  # Local Storage
   shared_preferences: 2.5.3
   
+  # Image Processing
+  image: ^4.0.17
+  
+  # TensorFlow Lite (for ML model)
+  tflite_flutter: ^0.10.4
+  
   # Permissions
-  permission_handler: ^11.3.0
+  permission_handler: ^11.0.1
   
-  # Background service
-  flutter_background_service: ^5.0.5
-  flutter_background_service_android: ^6.2.2
+  # Background Service
+  flutter_foreground_task: ^8.17.0
   
-  # Notifications
-  flutter_local_notifications: ^17.0.0
+  # System overlay (for screen capture detection)
+  # flutter_overlay_window: ^0.5.0  # Removed due to build issues
   
-  # Platform channel for native code
-  flutter_platform_widgets: ^6.1.0
+  # Path provider
+  path_provider: ^2.1.1
+  
+  # Localization
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:
@@ -43,6 +45,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   
-  assets:
-    - assets/models/
-    - assets/images/
+  # assets:
+  #   - assets/models/
+  #   - assets/images/
