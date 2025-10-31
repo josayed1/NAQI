@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
         width: 100,
         height: 100,
         decoration: BoxDecoration(
-          color: const Color(0xFF90EE90).withOpacity(0.2),
+          color: const Color(0xFF90EE90).withValues(alpha: 0.2),
           shape: BoxShape.circle,
         ),
         child: const Icon(
@@ -124,8 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: appState.isFilterActive
-                    ? const Color(0xFF3CB371).withOpacity(0.2)
-                    : Colors.grey.withOpacity(0.2),
+                    ? const Color(0xFF3CB371).withValues(alpha: 0.2)
+                    : Colors.grey.withValues(alpha: 0.2),
               ),
               child: Center(
                 child: Icon(
@@ -252,16 +252,22 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const Icon(Icons.tune, color: Color(0xFF3CB371)),
                 Expanded(
-                  child: Slider(
-                    value: appState.sensitivity,
-                    min: 0.0,
-                    max: 1.0,
-                    divisions: 10,
-                    label: '${(appState.sensitivity * 100).toInt()}%',
-                    activeColor: const Color(0xFF3CB371),
-                    onChanged: (value) {
-                      appState.updateSensitivity(value);
-                    },
+                  child: SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      activeTrackColor: const Color(0xFF3CB371),
+                      thumbColor: const Color(0xFF3CB371),
+                      inactiveTrackColor: Colors.grey[300],
+                    ),
+                    child: Slider(
+                      value: appState.sensitivity,
+                      min: 0.0,
+                      max: 1.0,
+                      divisions: 10,
+                      label: '${(appState.sensitivity * 100).toInt()}%',
+                      onChanged: (value) {
+                        appState.updateSensitivity(value);
+                      },
+                    ),
                   ),
                 ),
                 Text(
@@ -412,7 +418,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ) {
     return Card(
       color: appState.isParentalControlEnabled
-          ? const Color(0xFF3CB371).withOpacity(0.1)
+          ? const Color(0xFF3CB371).withValues(alpha: 0.1)
           : null,
       child: InkWell(
         onTap: () {

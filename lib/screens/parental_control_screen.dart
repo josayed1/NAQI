@@ -44,7 +44,7 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF3CB371).withOpacity(0.2),
+                      color: const Color(0xFF3CB371).withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -91,7 +91,7 @@ class _ParentalControlScreenState extends State<ParentalControlScreen> {
                 
                 // Info Card
                 Card(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Colors.blue.withValues(alpha: 0.1),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(

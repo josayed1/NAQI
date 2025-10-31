@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'dart:math' as math;
 
@@ -18,7 +18,7 @@ class FilterService {
       await _channel.invokeMethod('initialize');
       _isInitialized = true;
     } catch (e) {
-      print('Filter service initialization error: $e');
+      if (kDebugMode) debugPrint('Filter service initialization error: $e');
       _isInitialized = true; // Continue anyway for demo
     }
   }
@@ -39,7 +39,7 @@ class FilterService {
       }
       return false;
     } catch (e) {
-      print('Start monitoring error: $e');
+      if (kDebugMode) debugPrint('Start monitoring error: $e');
       // Fallback: start demo mode
       _isMonitoring = true;
       _startDemoMode();
@@ -54,7 +54,7 @@ class FilterService {
     try {
       await _channel.invokeMethod('stopMonitoring');
     } catch (e) {
-      print('Stop monitoring error: $e');
+      if (kDebugMode) debugPrint('Stop monitoring error: $e');
     }
   }
   
@@ -79,7 +79,7 @@ class FilterService {
           }
         }
       } catch (e) {
-        print('Screen capture error: $e');
+        if (kDebugMode) debugPrint('Screen capture error: $e');
       }
     });
   }
@@ -94,7 +94,7 @@ class FilterService {
       
       // Random detection simulation (10% chance)
       if (math.Random().nextDouble() < 0.1) {
-        print('🌿 Demo: NSFW content detected (simulated)');
+        if (kDebugMode) debugPrint('🌿 Demo: NSFW content detected (simulated)');
       }
     });
   }
@@ -167,7 +167,7 @@ class FilterService {
         });
       }
     } catch (e) {
-      print('Apply blur error: $e');
+      if (kDebugMode) debugPrint('Apply blur error: $e');
     }
   }
   

@@ -114,28 +114,24 @@ class SettingsScreen extends StatelessWidget {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              RadioListTile<String>(
+              ListTile(
                 title: const Text('العربية'),
-                value: 'ar',
-                groupValue: appState.locale.languageCode,
-                activeColor: const Color(0xFF3CB371),
-                onChanged: (value) {
-                  if (value != null) {
-                    appState.changeLanguage(value);
-                    Navigator.pop(context);
-                  }
+                leading: appState.locale.languageCode == 'ar'
+                    ? const Icon(Icons.check_circle, color: Color(0xFF3CB371))
+                    : const Icon(Icons.circle_outlined),
+                onTap: () {
+                  appState.changeLanguage('ar');
+                  Navigator.pop(context);
                 },
               ),
-              RadioListTile<String>(
+              ListTile(
                 title: const Text('English'),
-                value: 'en',
-                groupValue: appState.locale.languageCode,
-                activeColor: const Color(0xFF3CB371),
-                onChanged: (value) {
-                  if (value != null) {
-                    appState.changeLanguage(value);
-                    Navigator.pop(context);
-                  }
+                leading: appState.locale.languageCode == 'en'
+                    ? const Icon(Icons.check_circle, color: Color(0xFF3CB371))
+                    : const Icon(Icons.circle_outlined),
+                onTap: () {
+                  appState.changeLanguage('en');
+                  Navigator.pop(context);
                 },
               ),
             ],
