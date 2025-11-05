@@ -45,9 +45,9 @@ class ImageProcessor {
 
   void _blurRegion(
     img.Image image,
-    BoundingBox region,
-    {required int blurIntensity},
-  ) {
+    BoundingBox region, {
+    required int blurIntensity,
+  }) {
     // Calculate region bounds
     final x = region.x.toInt().clamp(0, image.width - 1);
     final y = region.y.toInt().clamp(0, image.height - 1);
@@ -92,9 +92,9 @@ class ImageProcessor {
 
   void _pixelateRegion(
     img.Image image,
-    BoundingBox region,
-    {required int pixelSize},
-  ) {
+    BoundingBox region, {
+    required int pixelSize,
+  }) {
     final x = region.x.toInt().clamp(0, image.width - 1);
     final y = region.y.toInt().clamp(0, image.height - 1);
     final width = region.width.toInt().clamp(1, image.width - x);

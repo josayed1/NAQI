@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -65,19 +64,17 @@ class ScreenCaptureService {
     await _initForegroundTask(quietMode);
 
     // Start the foreground service
-    final ServiceRequestResult result = await FlutterForegroundTask.startService(
+    await FlutterForegroundTask.startService(
       serviceId: 256,
       notificationTitle: quietMode ? '' : 'تم تنظيف الشاشة',
       notificationText: quietMode ? '' : 'Naqi Active 🌿',
       callback: startCallback,
     );
 
-    if (result == ServiceRequestResult.success) {
-      _isRunning = true;
-      
-      // Start periodic screen capture and processing
-      _startPeriodicCapture(sensitivity);
-    }
+    _isRunning = true;
+    
+    // Start periodic screen capture and processing
+    _startPeriodicCapture(sensitivity);
   }
 
   Future<void> _initForegroundTask(bool quietMode) async {
@@ -170,9 +167,8 @@ class ScreenCaptureService {
         }
       }
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Error in capture and process: $e');
-      }
+      // Error handling - silently continue
+      // In production, this would be logged to analytics
     }
   }
 
@@ -216,7 +212,7 @@ class ScreenCaptureService {
 @pragma('vm:entry-point')
 class ScreenCaptureTaskHandler extends TaskHandler {
   @override
-  void onStart(DateTime timestamp) {
+  Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     // Task started
   }
 
@@ -226,7 +222,7 @@ class ScreenCaptureTaskHandler extends TaskHandler {
   }
 
   @override
-  void onDestroy(DateTime timestamp) {
+  Future<void> onDestroy(DateTime timestamp) async {
     // Task destroyed
   }
 

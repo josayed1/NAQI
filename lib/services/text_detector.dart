@@ -34,17 +34,15 @@ class TextDetector {
               _normalizeArabic(line.text).contains(_normalizeArabic(targetName))) {
             
             final rect = line.boundingBox;
-            if (rect != null) {
-              targetRegions.add(
-                BoundingBox(
-                  x: rect.left.toDouble(),
-                  y: rect.top.toDouble(),
-                  width: rect.width.toDouble(),
-                  height: rect.height.toDouble(),
-                  confidence: line.confidence ?? 0.9,
-                ),
-              );
-            }
+            targetRegions.add(
+              BoundingBox(
+                x: rect.left.toDouble(),
+                y: rect.top.toDouble(),
+                width: rect.width.toDouble(),
+                height: rect.height.toDouble(),
+                confidence: line.confidence ?? 0.9,
+              ),
+            );
           }
         }
       }
