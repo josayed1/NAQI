@@ -10,16 +10,10 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   
-  # TensorFlow Lite for NSFW detection
-  tflite_flutter: ^0.10.0
-  
   # Image processing
   image: ^4.0.0
   
-  # OpenCV alternative - native image processing
-  ffi: ^2.0.0
-  
-  # OCR for text detection
+  # OCR for text detection  
   google_mlkit_text_recognition: ^0.13.0
   
   # Permissions
@@ -39,10 +33,6 @@ dependencies:
   # Camera and gallery
   camera: ^0.10.0
   image_picker: ^1.0.0
-  
-  # Android services
-  flutter_foreground_task: ^9.0.0
-  android_intent_plus: ^5.0.0
   
   # Notifications
   flutter_local_notifications: ^17.0.0

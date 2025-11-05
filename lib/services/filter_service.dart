@@ -5,22 +5,64 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'settings_service.dart';
 import '../models/detection_result.dart';
 
-// Dummy implementations for NSFW and Text detection
+// NSFW Detection using heuristic analysis
 class NSFWDetector {
   static final NSFWDetector _instance = NSFWDetector._internal();
   factory NSFWDetector() => _instance;
   NSFWDetector._internal();
   
-  Future<void> initialize() async {}
+  Future<void> initialize() async {
+    if (kDebugMode) {
+      debugPrint('✅ NSFW Detector initialized (heuristic mode)');
+    }
+  }
+  
   Future<DetectionResult> detectFromImage(img.Image image, {List<TextDetection> textDetections = const []}) async {
+    // Simple heuristic: analyze image color distribution
+    // This is a placeholder - in production, you'd use actual ML models
+    
+    double skinToneRatio = _analyzeSkinTone(image);
+    bool isNsfw = skinToneRatio > 0.4; // More than 40% skin tone
+    
+    bool containsTargetName = textDetections.any((detection) => 
+      detection.containsName('يوسف') || detection.containsName('Youssef')
+    );
+    
     return DetectionResult(
-      isNsfw: false,
-      confidence: 0.0,
-      category: 'neutral',
+      isNsfw: isNsfw,
+      confidence: skinToneRatio,
+      category: isNsfw ? 'sensitive' : 'neutral',
       textDetections: textDetections,
-      containsTargetName: false,
+      containsTargetName: containsTargetName,
     );
   }
+  
+  double _analyzeSkinTone(img.Image image) {
+    // Analyze skin tone pixels (simplified heuristic)
+    int skinPixels = 0;
+    int totalPixels = image.width * image.height;
+    
+    // Sample every 10th pixel for performance
+    for (int y = 0; y < image.height; y += 10) {
+      for (int x = 0; x < image.width; x += 10) {
+        final pixel = image.getPixel(x, y);
+        if (_isSkinTone(pixel.r.toInt(), pixel.g.toInt(), pixel.b.toInt())) {
+          skinPixels++;
+        }
+      }
+    }
+    
+    return skinPixels / (totalPixels / 100);
+  }
+  
+  bool _isSkinTone(int r, int g, int b) {
+    // Simplified skin tone detection
+    return r > 95 && g > 40 && b > 20 &&
+           r > g && r > b &&
+           (r - g) > 15 &&
+           (r - g).abs() > 15;
+  }
+  
   void dispose() {}
 }
 
