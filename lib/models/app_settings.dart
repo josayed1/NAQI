@@ -1,57 +1,57 @@
-class AppSettings {
-  final bool isFilterEnabled;
-  final double sensitivity;
-  final bool quietMode;
-  final bool autoStart;
-  final String? parentPin;
-  final int filteredCount;
+import 'package:hive/hive.dart';
+
+part 'app_settings.g.dart';
+
+@HiveType(typeId: 0)
+class AppSettings extends HiveObject {
+  @HiveField(0)
+  bool isFilterEnabled;
+
+  @HiveField(1)
+  double sensitivity; // 0.0 to 1.0
+
+  @HiveField(2)
+  bool quietMode;
+
+  @HiveField(3)
+  bool parentModeEnabled;
+
+  @HiveField(4)
+  String? parentPin;
+
+  @HiveField(5)
+  int filteredScenesCount;
+
+  @HiveField(6)
+  bool autoStartOnBoot;
 
   AppSettings({
     this.isFilterEnabled = false,
     this.sensitivity = 0.7,
     this.quietMode = false,
-    this.autoStart = true,
+    this.parentModeEnabled = false,
     this.parentPin,
-    this.filteredCount = 0,
+    this.filteredScenesCount = 0,
+    this.autoStartOnBoot = false,
   });
 
   AppSettings copyWith({
     bool? isFilterEnabled,
     double? sensitivity,
     bool? quietMode,
-    bool? autoStart,
+    bool? parentModeEnabled,
     String? parentPin,
-    int? filteredCount,
+    int? filteredScenesCount,
+    bool? autoStartOnBoot,
   }) {
     return AppSettings(
       isFilterEnabled: isFilterEnabled ?? this.isFilterEnabled,
       sensitivity: sensitivity ?? this.sensitivity,
       quietMode: quietMode ?? this.quietMode,
-      autoStart: autoStart ?? this.autoStart,
+      parentModeEnabled: parentModeEnabled ?? this.parentModeEnabled,
       parentPin: parentPin ?? this.parentPin,
-      filteredCount: filteredCount ?? this.filteredCount,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'isFilterEnabled': isFilterEnabled,
-      'sensitivity': sensitivity,
-      'quietMode': quietMode,
-      'autoStart': autoStart,
-      'parentPin': parentPin,
-      'filteredCount': filteredCount,
-    };
-  }
-
-  factory AppSettings.fromJson(Map<String, dynamic> json) {
-    return AppSettings(
-      isFilterEnabled: json['isFilterEnabled'] as bool? ?? false,
-      sensitivity: (json['sensitivity'] as num?)?.toDouble() ?? 0.7,
-      quietMode: json['quietMode'] as bool? ?? false,
-      autoStart: json['autoStart'] as bool? ?? true,
-      parentPin: json['parentPin'] as String?,
-      filteredCount: json['filteredCount'] as int? ?? 0,
+      filteredScenesCount: filteredScenesCount ?? this.filteredScenesCount,
+      autoStartOnBoot: autoStartOnBoot ?? this.autoStartOnBoot,
     );
   }
 }
