@@ -1,63 +1,43 @@
 class AppSettings {
   bool isFilterEnabled;
-  double sensitivity;
+  double sensitivity; // 0.0 to 1.0
   int filteredCount;
-  bool silentMode;
-  bool parentMode;
+  bool quietMode;
+  bool parentModeEnabled;
   String? parentPin;
-  String language;
-
+  bool autoStartOnBoot;
+  
   AppSettings({
     this.isFilterEnabled = false,
     this.sensitivity = 0.7,
     this.filteredCount = 0,
-    this.silentMode = false,
-    this.parentMode = false,
+    this.quietMode = false,
+    this.parentModeEnabled = false,
     this.parentPin,
-    this.language = 'ar',
+    this.autoStartOnBoot = false,
   });
-
+  
   Map<String, dynamic> toJson() {
     return {
       'isFilterEnabled': isFilterEnabled,
       'sensitivity': sensitivity,
       'filteredCount': filteredCount,
-      'silentMode': silentMode,
-      'parentMode': parentMode,
+      'quietMode': quietMode,
+      'parentModeEnabled': parentModeEnabled,
       'parentPin': parentPin,
-      'language': language,
+      'autoStartOnBoot': autoStartOnBoot,
     };
   }
-
+  
   factory AppSettings.fromJson(Map<String, dynamic> json) {
     return AppSettings(
       isFilterEnabled: json['isFilterEnabled'] ?? false,
-      sensitivity: (json['sensitivity'] ?? 0.7).toDouble(),
+      sensitivity: json['sensitivity'] ?? 0.7,
       filteredCount: json['filteredCount'] ?? 0,
-      silentMode: json['silentMode'] ?? false,
-      parentMode: json['parentMode'] ?? false,
+      quietMode: json['quietMode'] ?? false,
+      parentModeEnabled: json['parentModeEnabled'] ?? false,
       parentPin: json['parentPin'],
-      language: json['language'] ?? 'ar',
-    );
-  }
-
-  AppSettings copyWith({
-    bool? isFilterEnabled,
-    double? sensitivity,
-    int? filteredCount,
-    bool? silentMode,
-    bool? parentMode,
-    String? parentPin,
-    String? language,
-  }) {
-    return AppSettings(
-      isFilterEnabled: isFilterEnabled ?? this.isFilterEnabled,
-      sensitivity: sensitivity ?? this.sensitivity,
-      filteredCount: filteredCount ?? this.filteredCount,
-      silentMode: silentMode ?? this.silentMode,
-      parentMode: parentMode ?? this.parentMode,
-      parentPin: parentPin ?? this.parentPin,
-      language: language ?? this.language,
+      autoStartOnBoot: json['autoStartOnBoot'] ?? false,
     );
   }
 }

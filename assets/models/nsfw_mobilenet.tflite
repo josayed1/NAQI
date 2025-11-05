@@ -1,0 +1,3 @@
+# This is a placeholder - In production, download a real NSFW detection model
+# Recommended: NSFW MobileNetV2 model from open-source repos
+# Size: ~4MB, Accuracy: ~93% for NSFW classification

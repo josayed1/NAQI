@@ -1,99 +1,108 @@
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-enum SensitivityLevel {
-  low,
-  medium,
-  high,
-}
+import '../models/app_settings.dart';
+import '../services/settings_service.dart';
+import '../services/screen_capture_service.dart';
 
 class AppState extends ChangeNotifier {
-  bool _isFilterActive = false;
-  bool _quietMode = false;
-  SensitivityLevel _sensitivity = SensitivityLevel.medium;
-  int _filteredCount = 0;
-  String? _parentalPin;
-  bool _isParentalLocked = false;
+  final SettingsService _settingsService = SettingsService();
+  final ScreenCaptureService _screenCaptureService = ScreenCaptureService();
+  
+  AppSettings _settings = AppSettings();
+  bool _isLoading = true;
 
-  bool get isFilterActive => _isFilterActive;
-  bool get quietMode => _quietMode;
-  SensitivityLevel get sensitivity => _sensitivity;
-  int get filteredCount => _filteredCount;
-  String? get parentalPin => _parentalPin;
-  bool get isParentalLocked => _isParentalLocked;
+  AppSettings get settings => _settings;
+  bool get isLoading => _isLoading;
+  bool get isServiceRunning => _screenCaptureService.isRunning;
 
-  double get sensitivityThreshold {
-    switch (_sensitivity) {
-      case SensitivityLevel.low:
-        return 0.8; // Only very explicit content
-      case SensitivityLevel.medium:
-        return 0.6; // Moderate filtering
-      case SensitivityLevel.high:
-        return 0.4; // More aggressive filtering
+  Future<void> initialize() async {
+    _isLoading = true;
+    notifyListeners();
+
+    await _settingsService.initialize();
+    _settings = await _settingsService.loadSettings();
+
+    // Setup callbacks
+    _screenCaptureService.onFilteredCountUpdate = (count) {
+      _settings.filteredCount = count;
+      _saveSettings();
+    };
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> toggleFilter(bool enabled) async {
+    _settings.isFilterEnabled = enabled;
+    
+    if (enabled) {
+      await _startService();
+    } else {
+      await _stopService();
+    }
+    
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> _startService() async {
+    try {
+      await _screenCaptureService.startService(
+        sensitivity: _settings.sensitivity,
+        quietMode: _settings.quietMode,
+      );
+    } catch (e) {
+      _settings.isFilterEnabled = false;
+      rethrow;
     }
   }
 
-  AppState() {
-    _loadSettings();
+  Future<void> _stopService() async {
+    await _screenCaptureService.stopService();
   }
 
-  Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    _isFilterActive = prefs.getBool('isFilterActive') ?? false;
-    _quietMode = prefs.getBool('quietMode') ?? false;
-    _filteredCount = prefs.getInt('filteredCount') ?? 0;
-    _parentalPin = prefs.getString('parentalPin');
-    _isParentalLocked = prefs.getBool('isParentalLocked') ?? false;
+  Future<void> updateSensitivity(double value) async {
+    _settings.sensitivity = value;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> toggleQuietMode(bool enabled) async {
+    _settings.quietMode = enabled;
+    await _saveSettings();
+    notifyListeners();
     
-    final sensitivityIndex = prefs.getInt('sensitivity') ?? 1;
-    _sensitivity = SensitivityLevel.values[sensitivityIndex];
-    
+    // Restart service if running to apply quiet mode
+    if (_settings.isFilterEnabled) {
+      await _stopService();
+      await _startService();
+    }
+  }
+
+  Future<void> toggleParentMode(bool enabled, String? pin) async {
+    _settings.parentModeEnabled = enabled;
+    _settings.parentPin = pin;
+    await _saveSettings();
     notifyListeners();
   }
 
-  Future<void> toggleFilter() async {
-    _isFilterActive = !_isFilterActive;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isFilterActive', _isFilterActive);
+  Future<void> resetFilterCount() async {
+    _settings.filteredCount = 0;
+    _screenCaptureService.resetCount();
+    await _saveSettings();
     notifyListeners();
   }
 
-  Future<void> setQuietMode(bool value) async {
-    _quietMode = value;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('quietMode', value);
-    notifyListeners();
+  Future<void> _saveSettings() async {
+    await _settingsService.saveSettings(_settings);
   }
 
-  Future<void> setSensitivity(SensitivityLevel level) async {
-    _sensitivity = level;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('sensitivity', level.index);
-    notifyListeners();
+  bool verifyParentPin(String pin) {
+    return _settings.parentPin == pin;
   }
 
-  Future<void> incrementFilteredCount() async {
-    _filteredCount++;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('filteredCount', _filteredCount);
-    notifyListeners();
-  }
-
-  Future<void> setParentalPin(String pin) async {
-    _parentalPin = pin;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('parentalPin', pin);
-    notifyListeners();
-  }
-
-  Future<void> toggleParentalLock(bool locked) async {
-    _isParentalLocked = locked;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isParentalLocked', locked);
-    notifyListeners();
-  }
-
-  bool verifyPin(String pin) {
-    return _parentalPin == pin;
+  @override
+  void dispose() {
+    _screenCaptureService.dispose();
+    super.dispose();
   }
 }
