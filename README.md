@@ -1,250 +1,302 @@
 # Naqi – نقي
 
-**Production-grade mobile content filtering application** with real computer vision and local on-device processing.
+**Production-Grade Content Filtering Mobile Application**
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.35.4-blue)](https://flutter.dev/)
-[![Dart](https://img.shields.io/badge/Dart-3.9.2-blue)](https://dart.dev/)
-[![License](https://img.shields.io/badge/License-Proprietary-red)](LICENSE)
+A professional on-device content filtering application built with Flutter, featuring real-time image processing, text detection, and intelligent blur effects.
 
-## 🌟 Overview
+---
 
-Naqi (Arabic: نقي - "Pure/Clean") is a **fully local, offline-first** content filtering application that detects and blurs sensitive content in real-time. All processing happens on-device with **zero cloud dependencies**.
+## 🌟 Features
 
-### Key Features
+### ✅ Core Functionality
+- **Real-time Content Filtering**: Automatic detection and filtering of sensitive content
+- **Arabic Text Detection**: OCR-powered detection of specific text patterns (يوسف / Youssef)
+- **Intelligent Blur Processing**: Selective and full-image blur capabilities using Gaussian blur
+- **Offline Operation**: All processing happens locally on-device - no internet required
+- **Material 3 UI**: Modern, clean interface with RTL (Right-to-Left) Arabic support
 
-✅ **Local Processing** - All operations run on your device, no internet required  
-✅ **Real-Time Detection** - Heuristic-based NSFW content detection using image analysis  
-✅ **Arabic Name Detection** - Detects and blurs the name "يوسف" (Yusuf) in text  
-✅ **Advanced Image Processing** - Gaussian blur and pixelation effects  
-✅ **System-Level Service** - Foreground service with MediaProjection support  
-✅ **RTL Arabic UI** - Native Arabic interface with English support  
-✅ **Parental Controls** - PIN-protected settings with parent mode  
-✅ **Auto-Start on Boot** - Starts automatically when device boots  
-✅ **Quiet Mode** - Hide notifications for discreet operation  
+### ⚙️ Advanced Settings
+- **Sensitivity Control**: Adjustable detection sensitivity (30% - 100%)
+- **Quiet Mode**: Disable notifications while filtering is active
+- **Parent Mode**: PIN-protected settings to prevent unauthorized changes
+- **Auto-Start**: Automatically enable protection on device boot
+- **Filter Statistics**: Track number of filtered scenes
+
+### 🔐 Security & Privacy
+- **Local Processing**: All detection and filtering happens on-device
+- **No Data Collection**: Zero external communication or data uploads
+- **Parent Controls**: PIN-protected settings modification
+- **Boot Protection**: Auto-start capability for continuous protection
+
+---
 
 ## 🏗️ Architecture
 
 ### Technology Stack
+- **Framework**: Flutter 3.35.4 with Dart 3.9.2
+- **Image Processing**: `image` package with Gaussian blur
+- **OCR**: Google ML Kit Text Recognition
+- **Storage**: Hive (local NoSQL database)
+- **State Management**: Provider
+- **Permissions**: Permission Handler
+- **Notifications**: Flutter Local Notifications
 
-- **Framework**: Flutter 3.35.4
-- **Language**: Dart 3.9.2
-- **Image Processing**: `image` package (v3.0.2) - Gaussian blur, pixelation, region masking
-- **Detection**: Heuristic-based skin tone analysis for NSFW detection
-- **State Management**: Provider pattern
-- **Local Storage**: SharedPreferences for settings persistence
-- **Permissions**: permission_handler for Android runtime permissions
-- **Foreground Service**: flutter_foreground_task for background operation
+### Detection Systems
 
-### Core Components
-
-```
-lib/
-├── models/
-│   ├── app_settings.dart      # Settings data model
-│   ├── app_state.dart          # Global app state provider
-│   └── detection_result.dart   # Detection result structures
-├── screens/
-│   ├── home_screen.dart        # Main UI with RTL support
-│   └── parent_lock_screen.dart # PIN lock interface
-├── services/
-│   ├── nsfw_detector.dart          # Heuristic NSFW detection
-│   ├── text_detector.dart          # Text/OCR detection placeholder
-│   ├── image_processor.dart        # Blur/pixelation pipeline
-│   ├── screen_capture_service.dart # MediaProjection service
-│   └── settings_service.dart       # Persistent settings
-└── widgets/
-    ├── settings_card.dart     # Settings UI components
-    └── stats_card.dart        # Statistics display
+#### 1. NSFW Detection (Heuristic-Based)
+```dart
+- Skin tone analysis using RGB color distribution
+- Pixel sampling for performance optimization
+- Confidence scoring (0.0 - 1.0)
+- Configurable sensitivity threshold
 ```
 
-## 🚀 Getting Started
+#### 2. Text Detection (ML Kit OCR)
+```dart
+- Real-time text recognition
+- Arabic and Latin script support
+- Bounding box detection for selective blur
+- Target name matching (يوسف, Youssef, Yusuf, Yousef)
+```
+
+#### 3. Blur Processing
+```dart
+- Full-image Gaussian blur for sensitive content
+- Selective region blur for text matches
+- Configurable blur radius
+- Efficient PNG encoding
+```
+
+---
+
+## 📱 Screens
+
+### Home Screen
+- Filter toggle with real-time status
+- Sensitivity slider (visual feedback)
+- Statistics display (filtered scenes counter)
+- Quick access to test functionality
+
+### Test Screen
+- Image capture from camera
+- Image selection from gallery
+- Real-time processing preview
+- Before/After comparison
+
+### Settings Screen
+- Quiet mode toggle
+- Auto-start configuration
+- Parent mode with PIN protection
+- Filter counter reset
+- App information
+
+---
+
+## 🔧 Configuration
+
+### Android Permissions (AndroidManifest.xml)
+```xml
+- CAMERA: Image capture for testing
+- READ_MEDIA_IMAGES: Gallery access
+- POST_NOTIFICATIONS: Filter notifications
+- SYSTEM_ALERT_WINDOW: Overlay capability
+- RECEIVE_BOOT_COMPLETED: Auto-start
+- FOREGROUND_SERVICE: Background processing
+```
+
+### Package Structure
+```
+com.naqi.filter.naqi_filter
+```
+
+---
+
+## 📦 Installation
 
 ### Prerequisites
+- Flutter 3.35.4 or compatible
+- Android SDK 26+ (Android 8.0 Oreo)
+- Java 17 (OpenJDK)
 
-- Flutter SDK 3.35.4+
-- Android SDK (API 26+)
-- Dart SDK 3.9.2+
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/josayed1/NAQI.git
-   cd NAQI
-   ```
-
-2. **Install dependencies**
-   ```bash
-   flutter pub get
-   ```
-
-3. **Build release APK**
-   ```bash
-   flutter build apk --release
-   ```
-
-4. **Install on device**
-   ```bash
-   flutter install
-   ```
-
-## 📱 Android Permissions
-
-The app requires the following Android permissions:
-
-- `INTERNET` - For future cloud features (currently unused)
-- `FOREGROUND_SERVICE` - Run background filtering service
-- `FOREGROUND_SERVICE_MEDIA_PROJECTION` - Screen capture capability
-- `RECEIVE_BOOT_COMPLETED` - Auto-start on device boot
-- `WAKE_LOCK` - Keep service running
-- `SYSTEM_ALERT_WINDOW` - Overlay window capability
-- `POST_NOTIFICATIONS` - Display service notifications
-
-## 🎨 UI Features
-
-### Material Design 3
-- Custom color scheme: Medium Sea Green (#3CB371) and Light Green (#90EE90)
-- RTL (Right-to-Left) layout for Arabic
-- Responsive design for all screen sizes
-- Dark theme support (optional)
-
-### Screens
-
-1. **Home Screen**
-   - Service toggle with real-time status
-   - Filter counter display
-   - Sensitivity slider (30%-95%)
-   - Quiet mode toggle
-   - Parent mode lock
-
-2. **Parent Lock Screen**
-   - 4-6 digit PIN setup
-   - PIN verification for settings access
-   - Secure PIN storage
-
-## ⚙️ Configuration
-
-### Sensitivity Levels
-
-- **Low (30-50%)**: Minimal filtering, fewer false positives
-- **Medium (50-70%)**: Balanced detection (default: 70%)
-- **High (70-95%)**: Maximum filtering, may have false positives
-
-### Filter Modes
-
-1. **Gaussian Blur**: Soft blur on sensitive regions (default)
-2. **Pixelation**: Mosaic effect for privacy
-3. **Hybrid**: Blur + text highlighting
-
-## 🔧 Development
-
-### Build Variants
-
+### Build Steps
 ```bash
-# Debug APK (with debugging enabled)
-flutter build apk --debug
+# Clone repository
+git clone https://github.com/josayed1/NAQI.git
+cd NAQI
 
-# Release APK (optimized, ~48MB)
+# Get dependencies
+flutter pub get
+
+# Build release APK
 flutter build apk --release
 
-# Profile APK (for performance testing)
-flutter build apk --profile
+# APK location:
+# build/app/outputs/flutter-apk/app-release.apk (96MB)
 ```
 
-### Testing
+---
 
-```bash
-# Run all tests
-flutter test
+## 🎨 Design
 
-# Run with coverage
-flutter test --coverage
+### Color Scheme
+- **Primary**: #3CB371 (Medium Sea Green) - Purity and protection
+- **Secondary**: #90EE90 (Light Green) - Calm and safety
+- **Background**: White - Clean and minimal
+- **Accent**: Orange (for warnings/changes)
 
-# Analyze code
-flutter analyze
+### Iconography
+- Water droplet symbol representing purity and cleanliness
+- Shield icons for protection features
+- Material Design 3 icons throughout
+
+### Typography
+- Arabic-optimized font rendering
+- Clear hierarchy with bold headings
+- RTL (Right-to-Left) text direction
+
+---
+
+## 🚀 Usage
+
+### First Launch
+1. App requests necessary permissions (camera, storage, notifications)
+2. Navigate to home screen
+3. Toggle filter ON/OFF as needed
+4. Adjust sensitivity using the slider
+
+### Testing the Filter
+1. Tap "اختبار التصفية" (Test Filter)
+2. Select image from gallery or capture new photo
+3. Tap "تحليل ومعالجة" (Analyze and Process)
+4. View results (blurred if sensitive content detected)
+
+### Configuring Settings
+1. Tap settings icon (⚙️) in top-right
+2. Configure quiet mode, auto-start, or parent mode
+3. Set PIN protection if desired
+4. View or reset filter statistics
+
+---
+
+## 🔒 Parent Mode
+
+### Setup
+1. Go to Settings
+2. Enable "وضع الوالدين" (Parent Mode)
+3. Set 4-digit PIN code
+4. Confirm PIN
+
+### Features
+- PIN-protected settings modification
+- PIN change capability (with verification)
+- Disable protection with PIN verification
+- Prevent unauthorized sensitivity changes
+
+---
+
+## 📊 Technical Specifications
+
+### App Details
+- **Name**: naqi
+- **Display Name**: Naqi – نقي
+- **Version**: 1.0.0+1
+- **Package**: com.naqi.filter.naqi_filter
+- **Min SDK**: 26 (Android 8.0)
+- **Target SDK**: 35 (Android 15)
+
+### APK Information
+- **Size**: ~96 MB
+- **Architecture**: Universal APK (arm64-v8a, armeabi-v7a, x86_64)
+- **Minification**: Disabled for stability
+- **Signing**: Debug key (replace for production)
+
+---
+
+## 🛠️ Development
+
+### Project Structure
+```
+lib/
+├── models/           # Data models (AppSettings, DetectionResult)
+├── screens/          # UI screens (Home, Settings, Test)
+├── services/         # Business logic (Filter, Settings, Detection)
+└── main.dart         # App entry point
+
+assets/
+├── models/           # ML models and labels
+├── images/           # App images
+└── icons/            # App icon
+
+android/
+├── app/
+│   ├── src/main/
+│   │   ├── kotlin/   # Native Android code
+│   │   └── res/      # Android resources
+│   └── build.gradle.kts
+└── ...
 ```
 
-## 📊 Performance
+### Key Services
+1. **FilterService**: Orchestrates detection and processing
+2. **SettingsService**: Manages app configuration with Hive
+3. **NSFWDetector**: Heuristic-based content analysis
+4. **TextDetectorService**: ML Kit OCR integration
+5. **BlurProcessor**: Image blur pipeline
 
-- **APK Size**: ~48MB (release, optimized)
-- **RAM Usage**: ~150MB active filtering
-- **CPU Impact**: <5% during inactive periods
-- **Detection Latency**: <100ms per frame
+---
 
-## 🔒 Privacy & Security
+## 🐛 Known Limitations
 
-- ✅ **100% Local Processing** - No data sent to servers
-- ✅ **No Analytics** - Zero tracking or telemetry
-- ✅ **No Network Access** - Works completely offline
-- ✅ **Encrypted PIN** - Parent mode uses secure storage
-- ✅ **No Log Files** - No user activity logging
+### Current Implementation
+- **NSFW Detection**: Uses heuristic skin-tone analysis instead of deep learning models
+  - Reason: TensorFlow Lite dependency causes NDK/CMake build issues
+  - Production Note: Replace with actual ML model (e.g., NSFW MobileNet)
+  
+- **Screen Capture**: Basic implementation without real-time screen monitoring
+  - Reason: MediaProjection requires foreground service complexity
+  - Future Enhancement: Implement continuous screen capture service
 
-## 📝 Technical Details
+- **Background Service**: Not fully implemented
+  - Reason: Android 14+ restrictions on background services
+  - Alternative: Use WorkManager for periodic checks
 
-### Detection Algorithm
+### Recommended Improvements
+1. Integrate pre-trained NSFW detection model (OpenCV DNN or ONNX Runtime)
+2. Implement proper foreground service for continuous monitoring
+3. Add cloud backup for settings (optional)
+4. Implement content filtering history log
+5. Add export/import settings functionality
 
-The app uses a **heuristic-based approach** for NSFW detection:
-
-1. **Skin Tone Analysis**: Analyzes RGB values to detect skin tone pixels
-2. **Threshold Classification**: Compares skin tone ratio against sensitivity threshold
-3. **Region Generation**: Creates bounding boxes for detected areas
-4. **Blur Application**: Applies Gaussian blur to sensitive regions
-
-**Formula**:
-```dart
-isSkinTone = (R > 95) && (G > 40) && (B > 20) && 
-             (R > G) && (R > B) && 
-             (|R - G| > 15) && (R - B > 15)
-```
-
-### Image Processing Pipeline
-
-1. Decode image bytes to Image object
-2. Analyze pixels for detection
-3. Generate bounding boxes for regions
-4. Extract and blur specific regions
-5. Composite blurred regions back
-6. Encode to JPEG with quality optimization
-
-## 🛠️ Known Limitations
-
-⚠️ **Screen Capture**: MediaProjection API integration requires native Android implementation (platform channel)  
-⚠️ **OCR**: Text detection for "يوسف" is placeholder only, requires OCR library integration  
-⚠️ **Model Accuracy**: Heuristic detection has ~70-80% accuracy vs ML models (93%+)  
-⚠️ **iOS Support**: Currently Android-only, iOS requires separate implementation  
-
-## 🚀 Future Enhancements
-
-- [ ] Integrate real TensorFlow Lite NSFW model (when compatible packages available)
-- [ ] Add Tesseract OCR for Arabic text detection
-- [ ] Implement MediaProjection screen capture
-- [ ] Add custom filter sensitivity per app
-- [ ] Create whitelist/blacklist for apps
-- [ ] Add activity log with timestamps
-- [ ] Support multiple languages (UI)
-- [ ] Add cloud backup for settings (optional)
+---
 
 ## 📄 License
 
-**Proprietary Software** - All rights reserved.
+This project is a demonstration of production-grade Flutter development techniques.
 
-This project is confidential and proprietary. Unauthorized copying, modification, distribution, or use of this software, via any medium, is strictly prohibited.
+---
 
-## 👥 Contributing
+## 👨‍💻 Developer
 
-This is a private project. Contributions are not accepted at this time.
+Built with Flutter + Dart by AI-assisted development.
 
-## 📧 Contact
+**GitHub Repository**: https://github.com/josayed1/NAQI
 
-For inquiries: [Contact via GitHub Issues](https://github.com/josayed1/NAQI/issues)
+---
 
 ## 🙏 Acknowledgments
 
 - Flutter team for the excellent framework
-- `image` package maintainers for powerful image processing
-- Open-source community for inspiration and guidance
+- Google ML Kit for OCR capabilities
+- Material Design 3 for UI components
+- Hive for efficient local storage
+- Image package for processing capabilities
 
 ---
 
-**Built with ❤️ using Flutter**  
-© 2025 Naqi Project. All rights reserved.
+## 📞 Support
+
+For issues, questions, or contributions, please open an issue on the GitHub repository.
+
+---
+
+**Built for production. Optimized for privacy. Designed for Arabic users.**
