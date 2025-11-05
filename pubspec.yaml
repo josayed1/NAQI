@@ -18,9 +18,6 @@ dependencies:
   hive: 2.2.3
   hive_flutter: 1.1.0
   
-  # TensorFlow Lite for ML
-  tflite_flutter: ^0.9.0
-  
   # Image Processing
   image: ^3.0.2
   
@@ -32,9 +29,6 @@ dependencies:
   
   # Screenshot/Screen Capture
   screenshot: ^3.0.0
-  
-  # OCR - Google ML Kit (lighter alternative to Tesseract)
-  google_ml_kit: ^0.16.0
   
   # Path utilities
   path_provider: ^2.1.5
