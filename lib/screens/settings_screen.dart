@@ -1,202 +1,308 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/app_state_provider.dart';
+import '../services/settings_service.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  final TextEditingController _pinController = TextEditingController();
+
+  @override
+  void dispose() {
+    _pinController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final appState = Provider.of<AppStateProvider>(context);
-    final isRTL = appState.locale.languageCode == 'ar';
+    final settingsService = Provider.of<SettingsService>(context, listen: false);
+    final settings = settingsService.getSettings();
 
     return Directionality(
-      textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+      textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(isRTL ? 'الإعدادات' : 'Settings'),
+          title: const Text('الإعدادات'),
         ),
-        body: ListView(
-          children: [
-            // Language Section
-            ListTile(
-              leading: const Icon(Icons.language, color: Color(0xFF3CB371)),
-              title: Text(isRTL ? 'اللغة' : 'Language'),
-              subtitle: Text(isRTL ? 'العربية' : 'English'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                _showLanguageDialog(context, appState, isRTL);
-              },
-            ),
-            const Divider(),
-            
-            // About Section
-            ListTile(
-              leading: const Icon(Icons.info_outline, color: Color(0xFF3CB371)),
-              title: Text(isRTL ? 'حول التطبيق' : 'About'),
-              onTap: () {
-                showAboutDialog(
-                  context: context,
-                  applicationName: isRTL ? 'نقي - Naqi' : 'Naqi - Pure',
-                  applicationVersion: '1.0.0',
-                  applicationIcon: const Icon(
-                    Icons.water_drop,
-                    size: 48,
-                    color: Color(0xFF3CB371),
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              // Quiet Mode
+              Card(
+                child: SwitchListTile(
+                  title: const Text(
+                    'الوضع الصامت',
+                    style: TextStyle(fontWeight: FontWeight.w600),
                   ),
-                  children: [
-                    Text(
-                      isRTL
-                          ? 'تطبيق ذكي لفلترة المحتوى غير اللائق مع الحفاظ على الخصوصية. جميع المعالجات تتم محليًا على الجهاز.'
-                          : 'Smart content filtering app with privacy protection. All processing happens locally on your device.',
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                );
-              },
-            ),
-            const Divider(),
-            
-            // Privacy Policy
-            ListTile(
-              leading: const Icon(Icons.privacy_tip_outlined, color: Color(0xFF3CB371)),
-              title: Text(isRTL ? 'سياسة الخصوصية' : 'Privacy Policy'),
-              onTap: () {
-                _showPrivacyDialog(context, isRTL);
-              },
-            ),
-            const Divider(),
-            
-            // Version Info
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Center(
+                  subtitle: const Text('إيقاف الإشعارات'),
+                  value: settings.quietMode,
+                  activeTrackColor: const Color(0xFF3CB371),
+                  onChanged: (value) async {
+                    await settingsService.toggleQuietMode(value);
+                    setState(() {});
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Auto Start on Boot
+              Card(
+                child: SwitchListTile(
+                  title: const Text(
+                    'التشغيل التلقائي',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const Text('تفعيل الحماية عند بدء الجهاز'),
+                  value: settings.autoStartOnBoot,
+                  activeTrackColor: const Color(0xFF3CB371),
+                  onChanged: (value) async {
+                    await settingsService.setAutoStart(value);
+                    setState(() {});
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Parent Mode
+              Card(
                 child: Column(
                   children: [
-                    const Icon(
-                      Icons.water_drop,
-                      size: 64,
-                      color: Color(0xFF3CB371),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      isRTL ? 'نقي - Naqi' : 'Naqi - Pure',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF3CB371),
+                    SwitchListTile(
+                      title: const Text(
+                        'وضع الوالدين',
+                        style: TextStyle(fontWeight: FontWeight.w600),
                       ),
+                      subtitle: const Text('حماية الإعدادات برمز PIN'),
+                      value: settings.parentModeEnabled,
+                      activeTrackColor: const Color(0xFF3CB371),
+                      onChanged: (value) async {
+                        if (value) {
+                          _showSetPinDialog();
+                        } else {
+                          if (settings.parentPin != null) {
+                            _showVerifyPinDialog(() async {
+                              await settingsService.setParentMode(false, null);
+                              setState(() {});
+                            });
+                          } else {
+                            await settingsService.setParentMode(false, null);
+                            setState(() {});
+                          }
+                        }
+                      },
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'v1.0.0',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
+                    if (settings.parentModeEnabled && settings.parentPin != null)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            _showVerifyPinDialog(() {
+                              _showSetPinDialog();
+                            });
+                          },
+                          icon: const Icon(Icons.lock_reset),
+                          label: const Text('تغيير رمز PIN'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                          ),
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
+
+              const SizedBox(height: 16),
+
+              // Reset Counter
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.refresh, color: Color(0xFF3CB371)),
+                  title: const Text(
+                    'إعادة تعيين العداد',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text('المحتوى المحظور: ${settings.filteredScenesCount}'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: AlertDialog(
+                          title: const Text('إعادة تعيين العداد'),
+                          content: const Text('هل تريد إعادة تعيين عداد المحتوى المحظور؟'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('إلغاء'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('تأكيد'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+
+                    if (confirm == true) {
+                      await settingsService.resetFilterCount();
+                      setState(() {});
+                    }
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // About Section
+              Card(
+                color: const Color(0xFF90EE90).withValues(alpha: 0.1),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.water_drop_outlined,
+                        size: 48,
+                        color: Color(0xFF3CB371),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Naqi – نقي',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF3CB371),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'نسخة 1.0.0',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'حماية ذكية بتقنية الذكاء الاصطناعي\nتصفية محلية بدون إنترنت',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSetPinDialog() {
+    _pinController.clear();
+    showDialog(
+      context: context,
+      builder: (context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          title: const Text('تعيين رمز PIN'),
+          content: TextField(
+            controller: _pinController,
+            keyboardType: TextInputType.number,
+            maxLength: 4,
+            obscureText: true,
+            decoration: const InputDecoration(
+              labelText: 'رمز PIN (4 أرقام)',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('إلغاء'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final pin = _pinController.text;
+                if (pin.length == 4) {
+                  final settingsService = Provider.of<SettingsService>(context, listen: false);
+                  await settingsService.setParentMode(true, pin);
+                  setState(() {});
+                  if (mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('تم تعيين رمز PIN بنجاح')),
+                    );
+                  }
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('يجب إدخال 4 أرقام')),
+                    );
+                  }
+                }
+              },
+              child: const Text('تأكيد'),
             ),
           ],
         ),
       ),
     );
   }
-  
-  void _showLanguageDialog(BuildContext context, AppStateProvider appState, bool isRTL) {
+
+  void _showVerifyPinDialog(VoidCallback onSuccess) {
+    _pinController.clear();
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(isRTL ? 'اختر اللغة' : 'Choose Language'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: const Text('العربية'),
-                leading: appState.locale.languageCode == 'ar'
-                    ? const Icon(Icons.check_circle, color: Color(0xFF3CB371))
-                    : const Icon(Icons.circle_outlined),
-                onTap: () {
-                  appState.changeLanguage('ar');
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('English'),
-                leading: appState.locale.languageCode == 'en'
-                    ? const Icon(Icons.check_circle, color: Color(0xFF3CB371))
-                    : const Icon(Icons.circle_outlined),
-                onTap: () {
-                  appState.changeLanguage('en');
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-  
-  void _showPrivacyDialog(BuildContext context, bool isRTL) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(isRTL ? 'سياسة الخصوصية' : 'Privacy Policy'),
-          content: SingleChildScrollView(
-            child: Text(
-              isRTL
-                  ? '''
-🔒 الخصوصية والأمان
-
-تطبيق نقي يحترم خصوصيتك:
-
-✅ جميع المعالجات محلية
-لا يتم إرسال أي بيانات للخوادم. كل المعالجة تتم على جهازك.
-
-✅ لا نجمع بياناتك
-لا نقوم بجمع أو تخزين أي معلومات شخصية أو صور.
-
-✅ مفتوح المصدر
-الكود متاح للمراجعة لضمان الشفافية.
-
-✅ التحكم الكامل
-أنت من يتحكم في تشغيل وإيقاف الفلتر.
-                  '''
-                  : '''
-🔒 Privacy & Security
-
-Naqi app respects your privacy:
-
-✅ All Processing is Local
-No data is sent to servers. Everything happens on your device.
-
-✅ We Don't Collect Data
-We do not collect or store any personal information or images.
-
-✅ Open Source
-Code is available for review to ensure transparency.
-
-✅ Full Control
-You control when to enable or disable the filter.
-                  ''',
+      builder: (context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          title: const Text('التحقق من رمز PIN'),
+          content: TextField(
+            controller: _pinController,
+            keyboardType: TextInputType.number,
+            maxLength: 4,
+            obscureText: true,
+            decoration: const InputDecoration(
+              labelText: 'أدخل رمز PIN',
+              border: OutlineInputBorder(),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(
-                isRTL ? 'حسنًا' : 'OK',
-                style: const TextStyle(color: Color(0xFF3CB371)),
-              ),
+              child: const Text('إلغاء'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final settingsService = Provider.of<SettingsService>(context, listen: false);
+                if (settingsService.verifyParentPin(_pinController.text)) {
+                  Navigator.pop(context);
+                  onSuccess();
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('رمز PIN غير صحيح')),
+                    );
+                  }
+                }
+              },
+              child: const Text('تأكيد'),
             ),
           ],
-        );
-      },
+        ),
+      ),
     );
   }
 }

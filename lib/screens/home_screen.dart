@@ -1,243 +1,272 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/app_state.dart';
-import '../widgets/settings_card.dart';
-import '../widgets/stats_card.dart';
-import 'parent_lock_screen.dart';
+import '../services/settings_service.dart';
+import 'settings_screen.dart';
+import 'test_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
   Widget build(BuildContext context) {
+    final settingsService = Provider.of<SettingsService>(context, listen: false);
+    final settings = settingsService.getSettings();
+
     return Directionality(
-      textDirection: TextDirection.rtl, // RTL for Arabic
+      textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'نقي',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF3CB371),
-                ),
-              ),
-              SizedBox(width: 8),
-              Text(
-                'Naqi',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.black54,
-                ),
-              ),
-            ],
+          title: const Text(
+            'نقي – Naqi',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
           ),
-          centerTitle: true,
-          backgroundColor: Colors.white,
-          elevation: 0,
           actions: [
-            Consumer<AppState>(
-              builder: (context, state, child) {
-                if (state.settings.parentModeEnabled) {
-                  return IconButton(
-                    icon: const Icon(Icons.lock, color: Color(0xFF3CB371)),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ParentLockScreen(),
-                        ),
-                      );
-                    },
-                  );
-                }
-                return const SizedBox.shrink();
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                );
               },
             ),
           ],
         ),
-        body: Consumer<AppState>(
-          builder: (context, state, child) {
-            if (state.isLoading) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFF3CB371),
-                ),
-              );
-            }
-
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // App Logo
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [
-                          const Color(0xFF3CB371).withValues(alpha: 0.2),
-                          const Color(0xFF90EE90).withValues(alpha: 0.2),
-                        ],
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Logo Section
+                Container(
+                  padding: const EdgeInsets.all(40),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF90EE90).withValues(alpha: 0.3),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.water_drop_outlined,
+                          size: 60,
+                          color: Color(0xFF3CB371),
+                        ),
                       ),
-                    ),
-                    child: const Icon(
-                      Icons.water_drop,
-                      size: 80,
-                      color: Color(0xFF3CB371),
-                    ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'حماية ذكية',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF3CB371),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'تصفية محتوى تلقائية بالذكاء الاصطناعي',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Tagline
-                  Text(
-                    'حماية ذكية، محلية وآمنة',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey[700],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 32),
-                  
-                  // Stats Card
-                  const StatsCard(),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Main Toggle
-                  _buildMainToggle(context, state),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Settings Card
-                  const SettingsCard(),
-                  
-                  const SizedBox(height: 32),
-                  
-                  // Info
-                  _buildInfoSection(),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
+                ),
 
-  Widget _buildMainToggle(BuildContext context, AppState state) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: state.settings.isFilterEnabled
-              ? const LinearGradient(
-                  colors: [Color(0xFF3CB371), Color(0xFF90EE90)],
-                )
-              : null,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'تفعيل الحماية',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: state.settings.isFilterEnabled
-                          ? Colors.white
-                          : Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    state.settings.isFilterEnabled
-                        ? 'الخدمة نشطة الآن 🌿'
-                        : 'الخدمة متوقفة',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: state.settings.isFilterEnabled
-                          ? Colors.white70
-                          : Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Switch(
-              value: state.settings.isFilterEnabled,
-              onChanged: state.settings.parentModeEnabled
-                  ? null
-                  : (value) async {
-                      try {
-                        await state.toggleFilter(value);
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('فشل تفعيل الخدمة: $e'),
-                              backgroundColor: Colors.red,
+                const SizedBox(height: 20),
+
+                // Main Toggle Card
+                Card(
+                  elevation: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'التصفية النشطة',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'تفعيل الحماية التلقائية',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
                             ),
-                          );
-                        }
-                      }
-                    },
-              activeThumbColor: Colors.white,
-              activeTrackColor: Colors.white.withValues(alpha: 0.5),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+                            Switch(
+                              value: settings.isFilterEnabled,
+                              activeTrackColor: const Color(0xFF3CB371),
+                              onChanged: (value) async {
+                                await settingsService.toggleFilter(value);
+                                setState(() {});
+                              },
+                            ),
+                          ],
+                        ),
+                        if (settings.isFilterEnabled) ...[
+                          const Divider(height: 32),
+                          const Text(
+                            'مستوى الحساسية',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              const Text('منخفض'),
+                              Expanded(
+                                child: SliderTheme(
+                                  data: SliderTheme.of(context).copyWith(
+                                    activeTrackColor: const Color(0xFF3CB371),
+                                    thumbColor: const Color(0xFF3CB371),
+                                  ),
+                                  child: Slider(
+                                    value: settings.sensitivity,
+                                    min: 0.3,
+                                    max: 1.0,
+                                    divisions: 7,
+                                    label: '${(settings.sensitivity * 100).round()}%',
+                                    onChanged: (value) async {
+                                      await settingsService.setSensitivity(value);
+                                      setState(() {});
+                                    },
+                                  ),
+                                ),
+                              ),
+                              const Text('عالي'),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
 
-  Widget _buildInfoSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF90EE90).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          const Icon(
-            Icons.info_outline,
-            color: Color(0xFF3CB371),
-            size: 32,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'المعالجة المحلية بالكامل',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+                const SizedBox(height: 20),
+
+                // Statistics Card
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        const Icon(
+                          Icons.shield_outlined,
+                          size: 48,
+                          color: Color(0xFF3CB371),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'المحتوى المحظور',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '${settings.filteredScenesCount}',
+                          style: const TextStyle(
+                            fontSize: 48,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF3CB371),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'مشهد تم تصفيته',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Test Button
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const TestScreen()),
+                    );
+                  },
+                  icon: const Icon(Icons.camera_alt),
+                  label: const Text(
+                    'اختبار التصفية',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Status Indicator
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: settings.isFilterEnabled 
+                        ? const Color(0xFF90EE90).withValues(alpha: 0.2)
+                        : Colors.grey.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        settings.isFilterEnabled ? Icons.check_circle : Icons.cancel,
+                        color: settings.isFilterEnabled 
+                            ? const Color(0xFF3CB371) 
+                            : Colors.grey,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        settings.isFilterEnabled 
+                            ? 'الحماية مفعّلة 🌿'
+                            : 'الحماية معطّلة',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: settings.isFilterEnabled 
+                              ? const Color(0xFF3CB371) 
+                              : Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'جميع العمليات تتم على جهازك\nلا يتم إرسال أي بيانات للإنترنت',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

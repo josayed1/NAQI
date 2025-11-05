@@ -1,45 +1,81 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../models/app_settings.dart';
 
 class SettingsService {
+  static const String _boxName = 'settings';
   static final SettingsService _instance = SettingsService._internal();
+  
+  Box<AppSettings>? _box;
+  
   factory SettingsService() => _instance;
   SettingsService._internal();
 
-  static const String _settingsKey = 'app_settings';
-  
-  SharedPreferences? _prefs;
-
   Future<void> initialize() async {
-    _prefs = await SharedPreferences.getInstance();
-  }
-
-  Future<AppSettings> loadSettings() async {
-    if (_prefs == null) await initialize();
+    await Hive.initFlutter();
     
-    final jsonString = _prefs!.getString(_settingsKey);
-    if (jsonString == null) {
-      return AppSettings();
+    // Register adapter if not already registered
+    if (!Hive.isAdapterRegistered(0)) {
+      Hive.registerAdapter(AppSettingsAdapter());
     }
     
-    try {
-      final json = jsonDecode(jsonString) as Map<String, dynamic>;
-      return AppSettings.fromJson(json);
-    } catch (e) {
-      return AppSettings();
+    _box = await Hive.openBox<AppSettings>(_boxName);
+    
+    // Initialize default settings if empty
+    if (_box!.isEmpty) {
+      await _box!.put('default', AppSettings());
     }
   }
 
-  Future<void> saveSettings(AppSettings settings) async {
-    if (_prefs == null) await initialize();
-    
-    final jsonString = jsonEncode(settings.toJson());
-    await _prefs!.setString(_settingsKey, jsonString);
+  AppSettings getSettings() {
+    return _box?.get('default') ?? AppSettings();
   }
 
-  Future<void> clearSettings() async {
-    if (_prefs == null) await initialize();
-    await _prefs!.remove(_settingsKey);
+  Future<void> updateSettings(AppSettings settings) async {
+    await _box?.put('default', settings);
+  }
+
+  Future<void> toggleFilter(bool enabled) async {
+    final current = getSettings();
+    await updateSettings(current.copyWith(isFilterEnabled: enabled));
+  }
+
+  Future<void> setSensitivity(double value) async {
+    final current = getSettings();
+    await updateSettings(current.copyWith(sensitivity: value));
+  }
+
+  Future<void> toggleQuietMode(bool enabled) async {
+    final current = getSettings();
+    await updateSettings(current.copyWith(quietMode: enabled));
+  }
+
+  Future<void> setParentMode(bool enabled, String? pin) async {
+    final current = getSettings();
+    await updateSettings(current.copyWith(
+      parentModeEnabled: enabled,
+      parentPin: pin,
+    ));
+  }
+
+  Future<void> incrementFilterCount() async {
+    final current = getSettings();
+    await updateSettings(current.copyWith(
+      filteredScenesCount: current.filteredScenesCount + 1,
+    ));
+  }
+
+  bool verifyParentPin(String pin) {
+    final settings = getSettings();
+    return settings.parentPin == pin;
+  }
+
+  Future<void> resetFilterCount() async {
+    final current = getSettings();
+    await updateSettings(current.copyWith(filteredScenesCount: 0));
+  }
+
+  Future<void> setAutoStart(bool enabled) async {
+    final current = getSettings();
+    await updateSettings(current.copyWith(autoStartOnBoot: enabled));
   }
 }

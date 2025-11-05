@@ -1,5 +1,5 @@
-name: flutter_app
-description: Naqi - نقي - Local content filtering app with TensorFlow Lite and OpenCV
+name: naqi_filter
+description: Naqi - نقي - Production-grade content filtering with on-device AI
 version: 1.0.0+1
 
 environment:
@@ -10,29 +10,42 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   
-  # State Management
-  provider: 6.1.5+1
+  # TensorFlow Lite for NSFW detection
+  tflite_flutter: ^0.10.0
   
-  # Local Storage
+  # Image processing
+  image: ^4.0.0
+  
+  # OpenCV alternative - native image processing
+  ffi: ^2.0.0
+  
+  # OCR for text detection
+  google_mlkit_text_recognition: ^0.13.0
+  
+  # Permissions
+  permission_handler: ^11.0.0
+  
+  # Local storage
   shared_preferences: 2.5.3
   hive: 2.2.3
   hive_flutter: 1.1.0
   
-  # Image Processing
-  image: ^3.0.2
-  
-  # Permissions
-  permission_handler: ^11.0.1
-  
-  # Foreground Service
-  flutter_foreground_task: ^8.0.0
-  
-  # Screenshot/Screen Capture
-  screenshot: ^3.0.0
+  # State management
+  provider: 6.1.5+1
   
   # Path utilities
-  path_provider: ^2.1.5
-  path: ^1.9.0
+  path_provider: ^2.1.0
+  
+  # Camera and gallery
+  camera: ^0.10.0
+  image_picker: ^1.0.0
+  
+  # Android services
+  flutter_foreground_task: ^9.0.0
+  android_intent_plus: ^5.0.0
+  
+  # Notifications
+  flutter_local_notifications: ^17.0.0
 
 dev_dependencies:
   flutter_test:
@@ -44,5 +57,5 @@ flutter:
   
   assets:
     - assets/models/
-    - assets/icons/
+    - assets/tessdata/
     - assets/images/

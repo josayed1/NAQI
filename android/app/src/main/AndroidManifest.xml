@@ -1,5 +1,7 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Required Permissions -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" 
+    package="com.naqi.filter.naqi_filter">
+    
+    <!-- Critical Permissions for Content Filtering -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
@@ -7,6 +9,19 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    
+    <!-- Camera and Storage for Image Processing -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    
+    <!-- Screen Capture Permission -->
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
+    
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
     <application
         android:label="@string/app_name"

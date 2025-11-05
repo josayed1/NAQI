@@ -1,31 +1,39 @@
 class DetectionResult {
   final bool isNsfw;
   final double confidence;
-  final List<BoundingBox> sensitiveRegions;
-  final bool hasTargetText; // For "يوسف" detection
-  final List<BoundingBox> textRegions;
-  
+  final String category;
+  final List<TextDetection> textDetections;
+  final bool containsTargetName;
+
   DetectionResult({
     required this.isNsfw,
     required this.confidence,
-    required this.sensitiveRegions,
-    this.hasTargetText = false,
-    this.textRegions = const [],
+    required this.category,
+    required this.textDetections,
+    required this.containsTargetName,
   });
+
+  bool shouldBlur() {
+    return isNsfw || containsTargetName;
+  }
 }
 
-class BoundingBox {
+class TextDetection {
+  final String text;
   final double x;
   final double y;
   final double width;
   final double height;
-  final double confidence;
-  
-  BoundingBox({
+
+  TextDetection({
+    required this.text,
     required this.x,
     required this.y,
     required this.width,
     required this.height,
-    this.confidence = 1.0,
   });
+
+  bool containsName(String targetName) {
+    return text.contains(targetName);
+  }
 }

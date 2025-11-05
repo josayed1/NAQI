@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.naqi.app"
+    namespace = "com.naqi.filter.naqi_filter"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +21,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.naqi.app"
+        applicationId = "com.naqi.filter.naqi_filter"
         minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

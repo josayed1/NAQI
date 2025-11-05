@@ -1,5 +1,5 @@
 name: flutter_app
-description: naqi - NSFW content detection and filtering app for safe browsing
+description: Naqi - نقي - Local content filtering app with TensorFlow Lite and OpenCV
 version: 1.0.0+1
 
 environment:
@@ -9,6 +9,30 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
+  
+  # State Management
+  provider: 6.1.5+1
+  
+  # Local Storage
+  shared_preferences: 2.5.3
+  hive: 2.2.3
+  hive_flutter: 1.1.0
+  
+  # Image Processing
+  image: ^3.0.2
+  
+  # Permissions
+  permission_handler: ^11.0.1
+  
+  # Foreground Service
+  flutter_foreground_task: ^8.0.0
+  
+  # Screenshot/Screen Capture
+  screenshot: ^3.0.0
+  
+  # Path utilities
+  path_provider: ^2.1.5
+  path: ^1.9.0
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +41,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  assets:
+    - assets/models/
+    - assets/icons/
+    - assets/images/
